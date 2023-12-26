@@ -12,10 +12,10 @@ function App() {
       path:"/",
       element:<Body/>
     },
-    {
-      path:"/login",
-      element:<LoginPage/>
-    },
+    // {
+    //   path:"/login",
+    //   element:<LoginPage/>
+    // },
     {
       path:"/browse",
       element:<Browse/>

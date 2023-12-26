@@ -1,27 +1,24 @@
 import React, { useRef, useState } from 'react';
 import background from "./images/background.jpeg"
 import {checkvalidata} from "../utils/validation"
-import {createUserWithEmailAndPassword,signInWithEmailAndPassword,  onAuthStateChanged } from "firebase/auth";
+import {createUserWithEmailAndPassword,signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from '../utils/firebase';
 import { useDispatch } from 'react-redux';
 import {addUser, removeUser } from '../utils/userSlice';
 import { useNavigate } from 'react-router-dom';
-
+import Header from './Header';
 
 const LoginPage = () => {
-
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
 
     const [errorMessage,setErrorMessage]=useState(null);
     const [isSigninForm,setSigninForm] = useState(true)
 
-    
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-  const email = useRef(null);
-  const password = useRef(null);
+    const name = useRef(null);
+    const email = useRef(null);
+    const password = useRef(null);
 
   const handleValidation = () => {
       const message = checkvalidata(email.current.value,password.current.value);
@@ -32,6 +29,15 @@ const LoginPage = () => {
                 createUserWithEmailAndPassword(auth, email.current.value,password.current.value)
                 .then((userCredential) => { 
                 const user = userCredential.user;
+                updateProfile(user, {
+                  displayName: name.current.value,
+                  photoURL: "https://example.com/jane-q-user/profile.jpg"
+                }).then(() => {
+                  const { uid, email, displayName } = auth.currentUser;
+                  dispatch(addUser({uid: uid,email: email,displayName: displayName}));
+                }).catch((error) => {
+                  setErrorMessage(error.message);
+                });
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -39,17 +45,18 @@ const LoginPage = () => {
                 setErrorMessage(errorMessage2);
             });
 
-            onAuthStateChanged(auth, (user) => {
-              if (user) {
-                const {uid,email,displayName} = user;
-                dispatch(addUser({uid:uid,email:email,displayName:displayName}));
-                navigate("/browse");
-              } else {
-                // User is signed out
-                dispatch(removeUser());
-                navigate("/");
-              }
-            });
+            // onAuthStateChanged(auth, (user) => {
+            //   if (user) {
+            //     const {uid,email,displayName} = user;
+            //     // console.log(uid);
+            //     dispatch(addUser({uid:uid,email:email,displayName:displayName}));
+            //     navigate("/browse");
+            //   } else {
+            //     // User is signed out
+            //     dispatch(removeUser());
+            //     navigate("/");
+            //   }
+            // });
       }
       else{
         signInWithEmailAndPassword(auth, email.current.value,password.current.value)
@@ -63,19 +70,6 @@ const LoginPage = () => {
           const errorMessage3 = error.message;
           setErrorMessage(errorMessage3);
         });
-
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            const {uid,email,displayName} = user;
-            dispatch(addUser({uid:uid,email:email,displayName:displayName}));
-            navigate("/browse");
-          } else {
-            // User is signed out
-            dispatch(removeUser());
-            navigate("/");
-          }
-        });
-      
       }
   };
 
@@ -85,8 +79,9 @@ const LoginPage = () => {
   }
 
   return (
-    <>
-    <img className='bg-contain h-[100vh] w-[100vw] mb-3' src={background} alt="" />
+    <div>
+      <Header/>
+    {/* <img className='bg-cover mb-3' src={background} alt="" /> */}
     <div className="flex items-center justify-center absolute top-[200px] left-[550px]">
       <div className="bg-black p-8 rounded shadow-md w-96 bg-opacity-80">
         <h2 className="text-2xl font-semibold mb-4 text-white">{isSigninForm?"Sign in":"Sign Up"}</h2>
@@ -97,6 +92,7 @@ const LoginPage = () => {
           </label> 
         }
           {!isSigninForm && <input
+            ref={name}
             type="text"
             className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 py-2"
             placeholder="Enter your name"
@@ -136,7 +132,7 @@ const LoginPage = () => {
         <p className='text-white mt-3 cursor-pointer' onClick={handleToggleForm}>{isSigninForm ? "New to Netflix ? Sign up now":"Already user sign in now"}</p>
       </div>
     </div>
-    </>
+    </div>
   );
 };
 

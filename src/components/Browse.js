@@ -8,7 +8,10 @@ import { removeUser } from '../utils/userSlice';
 import useNowPlayingMovies from './customHooks/useNowPlayingMovies';
 import MainContainer from './MainContainer';
 import SecondaryContainer from './SecondaryContainer';
-
+import usePopularMovies from './customHooks/usePopularMovies';
+import useTopRatedMovies from './customHooks/useTopRatedMovies';
+import useUpComingMovies from './customHooks/useUpComingMovies';
+import Header from "./Header";
 
 const Browse = () => {
 
@@ -19,26 +22,24 @@ const Browse = () => {
     const handleSignOut = () => {
         signOut(auth)
         .then(() => {
-            navigate("/");
-            dispatch(removeUser());
+            // navigate("/");
+            // dispatch(removeUser());
         })
         .catch((error) => {
-        navigate("/error");
+        // navigate("/error");
     });
   }
     useNowPlayingMovies();
-
-
+    usePopularMovies();
+    useTopRatedMovies();
+    useUpComingMovies();
 
   return (
     <div>
-        <div className='flex items-center justify-between absolute gap-[1000px]'>
-             <img  className="w-44" src={netflix_logo} alt="logo" />  
-             <button onClick={handleSignOut} className='bg-red-700 h-10 px-3 rounded-lg text-white'>Sign out</button> 
-             {/* <p className='text-black cursor-pointer'>{user.email}</p> */}
-        </div>
+        <Header/>
         <MainContainer/>
         <SecondaryContainer/>
+        
     </div>
   )
 }
